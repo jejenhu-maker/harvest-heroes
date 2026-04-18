@@ -55,6 +55,9 @@ const Game = {
   gameTimer: null,
   gameDuration: 60,
   timeLeft: 60,
+  currentDay: 1,
+  dayTimer: 0,
+  dayDuration: 5, // real seconds per game-day
   animFrame: null,
   seedPage: 0,
   seedSwipe: { startX: 0, currentX: 0, swiping: false },
@@ -257,6 +260,8 @@ const Game = {
       p.plots = this.createEmptyPlots();
       p.x = 60;
       p.y = 200;
+      p.finished = false;
+      p.finishDay = 0;
     });
 
     this.timeLeft = this.gameDuration;
@@ -499,23 +504,45 @@ const Game = {
     if (this.gameTimer) clearInterval(this.gameTimer);
     if (this.animFrame) cancelAnimationFrame(this.animFrame);
 
-    this.gameTimer = setInterval(() => {
-      this.timeLeft--;
-      if (this.timeLeft <= 0) this.endRound();
+    this.currentDay = 1;
+    this.dayTimer = 0;
 
-      // Grow plants
+    this.gameTimer = setInterval(() => {
+      this.dayTimer++;
+      // Every dayDuration seconds = 1 game day
+      if (this.dayTimer >= this.dayDuration * 10) {
+        this.dayTimer = 0;
+        this.currentDay++;
+      }
+
+      // Grow plants based on days
       this.players.forEach(p => {
         p.plots.forEach(plot => {
           if (plot.planted && !plot.harvested && plot.growth < 100) {
-            let rate = 100 / (plot.seed.growTime * 10);
-            if (plot.watered > 0) { rate *= 1.5; plot.watered--; }
-            if (plot.fertilized) rate *= 2;
-            plot.growth = Math.min(100, plot.growth + rate);
+            // Growth tied to day progress
+            const dayProgress = (this.currentDay - 1 + this.dayTimer / (this.dayDuration * 10));
+            let growthTarget = (dayProgress / plot.seed.growTime) * 100;
+            // Boosts
+            if (plot.watered > 0) { growthTarget *= 1.3; plot.watered = Math.max(0, plot.watered - 0.1); }
+            if (plot.fertilized) growthTarget *= 1.5;
+            plot.growth = Math.min(100, growthTarget);
             plot.currentKg = (plot.growth / 100) * plot.seed.maxKg;
           }
         });
-        p.totalKg = p.plots.reduce((sum, pl) => sum + pl.currentKg, 0);
+        p.totalKg = p.plots.reduce((sum, pl) => sum + (pl.harvested ? pl.currentKg : 0), 0);
+
+        // Check win: all plots planted & harvested
+        const allPlanted = p.plots.every(pl => pl.planted);
+        const allHarvested = p.plots.every(pl => pl.harvested);
+        if (allPlanted && allHarvested && !p.finished) {
+          p.finished = true;
+          p.finishDay = this.currentDay;
+        }
       });
+
+      // Check if game is over (all players finished, or in 1P just P1)
+      const allDone = this.players.every(p => p.finished);
+      if (allDone) this.endRound();
     }, 100);
 
     const loop = () => {
@@ -739,6 +766,16 @@ const Game = {
         ctx.fillRect(barX, barY, barW, barH);
         ctx.fillStyle = plot.growth >= 100 ? '#FFD700' : '#66BB6A';
         ctx.fillRect(barX, barY, barW * growthFrac, barH);
+
+        // Days label (e.g. "3 days")
+        ctx.font = `bold ${8 * scaleX}px Fredoka, sans-serif`;
+        ctx.fillStyle = '#FFF';
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1.5;
+        ctx.textAlign = 'center';
+        const daysLabel = plot.growth >= 100 ? '✅ Ready!' : `${plot.seed.growTime}d`;
+        ctx.strokeText(daysLabel, px, barY + 12 * scaleY);
+        ctx.fillText(daysLabel, px, barY + 12 * scaleY);
         
         // "Ready!" sparkle
         if (plot.growth >= 100 && !plot.harvested) {
@@ -833,15 +870,25 @@ const Game = {
       return f.life > 0;
     });
 
-    // Timer
+    // Day counter
     ctx.textAlign = 'right';
     ctx.font = `bold ${15 * scaleX}px Fredoka, sans-serif`;
-    ctx.fillStyle = this.timeLeft <= 10 ? '#E53935' : '#FFF';
+    ctx.fillStyle = '#FFF';
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 3;
-    const timerText = `⏱ ${this.timeLeft}s`;
-    ctx.strokeText(timerText, w - 8, 22 * scaleY);
-    ctx.fillText(timerText, w - 8, 22 * scaleY);
+    const dayText = `📅 Day ${this.currentDay}`;
+    ctx.strokeText(dayText, w - 8, 22 * scaleY);
+    ctx.fillText(dayText, w - 8, 22 * scaleY);
+
+    // Day progress bar
+    const dpBarW = 60 * scaleX;
+    const dpBarH = 4 * scaleY;
+    const dpX = w - 8 - dpBarW;
+    const dpY = 28 * scaleY;
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(dpX, dpY, dpBarW, dpBarH);
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(dpX, dpY, dpBarW * (this.dayTimer / (this.dayDuration * 10)), dpBarH);
 
     ctx.textAlign = 'start';
   },
@@ -865,10 +912,14 @@ const Game = {
     const container = document.getElementById('result-players');
     container.innerHTML = '';
 
-    let maxKg = 0, winnerIdx = 0;
-    this.players.forEach((p, i) => {
-      if (p.totalKg > maxKg) { maxKg = p.totalKg; winnerIdx = i; }
-    });
+    // In 2P, winner = finished first (lowest finishDay)
+    let winnerIdx = 0;
+    if (this.playerCount > 1) {
+      let bestDay = Infinity;
+      this.players.forEach((p, i) => {
+        if (p.finishDay < bestDay) { bestDay = p.finishDay; winnerIdx = i; }
+      });
+    }
 
     this.players.forEach((p, i) => {
       const card = document.createElement('div');
@@ -877,6 +928,7 @@ const Game = {
         <div class="rc-avatar">${p.farmer.emoji}</div>
         <div class="rc-name">${p.farmer.name}</div>
         <div class="rc-weight">${p.totalKg.toFixed(1)} kg</div>
+        <div class="rc-days">📅 Day ${p.finishDay || this.currentDay}</div>
       `;
       container.appendChild(card);
     });
@@ -885,7 +937,7 @@ const Game = {
     if (this.playerCount > 1) {
       winnerEl.textContent = `🎉 ${this.players[winnerIdx].farmer.name} Wins!`;
     } else {
-      winnerEl.textContent = `🌟 Great harvest, ${this.players[0].farmer.name}!`;
+      winnerEl.textContent = `🌟 Harvested in ${this.players[0].finishDay || this.currentDay} days!`;
     }
 
     this.showScreen('result');
