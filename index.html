@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>Harvest Heroes 🌾</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container">
+    <!-- Title Screen -->
+    <div id="screen-title" class="screen active">
+      <div class="title-bg">
+        <div class="cloud cloud-1">☁️</div>
+        <div class="cloud cloud-2">☁️</div>
+        <div class="cloud cloud-3">☁️</div>
+        <div class="sun">🌞</div>
+        <h1 class="game-title">Harvest<br>Heroes</h1>
+        <div class="title-emoji">🌽🍅🥕🥦🍓🍊</div>
+        <div class="player-select">
+          <button class="btn btn-primary bounce" onclick="Game.selectPlayers(1)">
+            <span class="btn-icon">👨‍🌾</span>
+            <span>1 Player</span>
+          </button>
+          <button class="btn btn-secondary bounce" onclick="Game.selectPlayers(2)">
+            <span class="btn-icon">👨‍🌾👩‍🌾</span>
+            <span>2 Players</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Farmer Select Screen -->
+    <div id="screen-farmer" class="screen">
+      <div class="farmer-select-bg">
+        <h2 class="section-title" id="farmer-select-title">Choose Farmer 1</h2>
+        <div class="farmer-carousel" id="farmer-carousel">
+          <div class="farmer-card selected" data-farmer="0" onclick="Game.pickFarmer(0)">
+            <div class="farmer-avatar">👨‍🌾</div>
+            <div class="farmer-name">Sunny</div>
+          </div>
+          <div class="farmer-card" data-farmer="1" onclick="Game.pickFarmer(1)">
+            <div class="farmer-avatar">👩‍🌾</div>
+            <div class="farmer-name">Daisy</div>
+          </div>
+          <div class="farmer-card" data-farmer="2" onclick="Game.pickFarmer(2)">
+            <div class="farmer-avatar">🧑‍🌾</div>
+            <div class="farmer-name">Sage</div>
+          </div>
+          <div class="farmer-card" data-farmer="3" onclick="Game.pickFarmer(3)">
+            <div class="farmer-avatar">🧒</div>
+            <div class="farmer-name">Sprout</div>
+          </div>
+        </div>
+        <button class="btn btn-start" id="btn-confirm-farmer" onclick="Game.confirmFarmer()">
+          Confirm ✓
+        </button>
+      </div>
+    </div>
+
+    <!-- Seed Select Screen -->
+    <div id="screen-seeds" class="screen">
+      <div class="seeds-bg">
+        <h2 class="section-title">Pick 3 Seeds!</h2>
+        <div class="seed-count" id="seed-count">0 / 3 selected</div>
+        <div class="seed-grid" id="seed-grid"></div>
+        <button class="btn btn-start disabled" id="btn-start-game" onclick="Game.startFarming()">
+          🌱 Start Farming!
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Game Screen -->
+    <div id="screen-game" class="screen">
+      <!-- Player 1 viewport (or full screen in 1P) -->
+      <div class="game-viewport" id="viewport-1">
+        <canvas id="canvas-1"></canvas>
+        <div class="hud" id="hud-1">
+          <div class="hud-player">
+            <span id="hud-avatar-1">👨‍🌾</span>
+            <span id="hud-name-1">P1</span>
+          </div>
+          <div class="hud-weight" id="hud-weight-1">0.0 kg</div>
+          <div class="hud-tool" id="hud-tool-1">🤚</div>
+        </div>
+        <div class="action-btn hidden" id="action-btn-1" onclick="Game.doAction(0)">
+          <span class="action-icon">✋</span>
+        </div>
+      </div>
+      <!-- Player 2 viewport (2P only) -->
+      <div class="game-viewport hidden" id="viewport-2">
+        <canvas id="canvas-2"></canvas>
+        <div class="hud" id="hud-2">
+          <div class="hud-player">
+            <span id="hud-avatar-2">👩‍🌾</span>
+            <span id="hud-name-2">P2</span>
+          </div>
+          <div class="hud-weight" id="hud-weight-2">0.0 kg</div>
+          <div class="hud-tool" id="hud-tool-2">🤚</div>
+        </div>
+        <div class="action-btn hidden" id="action-btn-2" onclick="Game.doAction(1)">
+          <span class="action-icon">✋</span>
+        </div>
+      </div>
+      <!-- Touch Controls -->
+      <div class="touch-controls" id="touch-controls-1">
+        <div class="joystick-zone" id="joystick-1">
+          <div class="joystick-base">
+            <div class="joystick-knob" id="knob-1"></div>
+          </div>
+        </div>
+      </div>
+      <div class="touch-controls hidden" id="touch-controls-2">
+        <div class="joystick-zone" id="joystick-2">
+          <div class="joystick-base">
+            <div class="joystick-knob" id="knob-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shed Screen (overlay) -->
+    <div id="screen-shed" class="screen overlay hidden">
+      <div class="shed-panel">
+        <h2 class="section-title">🏠 Shed</h2>
+        <div class="shed-items">
+          <div class="shed-item" onclick="Game.pickTool('water')">
+            <div class="shed-icon">🚿</div>
+            <div class="shed-label">Watering Can</div>
+          </div>
+          <div class="shed-item" onclick="Game.pickTool('shovel')">
+            <div class="shed-icon">🔧</div>
+            <div class="shed-label">Shovel</div>
+          </div>
+          <div class="shed-item" onclick="Game.pickTool('fertilizer')">
+            <div class="shed-icon">💊</div>
+            <div class="shed-label">Fertilizer</div>
+          </div>
+          <div class="shed-item upgrade" onclick="Game.upgradeHouse()">
+            <div class="shed-icon">🏠⬆️</div>
+            <div class="shed-label">Upgrade House</div>
+          </div>
+        </div>
+        <button class="btn btn-close" onclick="Game.closeShed()">✕ Close</button>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="screen-result" class="screen">
+      <div class="result-bg">
+        <h2 class="result-title" id="result-title">🏆 Results!</h2>
+        <div class="result-players" id="result-players"></div>
+        <div class="result-winner" id="result-winner"></div>
+        <div class="result-actions">
+          <button class="btn btn-primary" onclick="Game.playAgain()">🔄 Play Again</button>
+          <button class="btn btn-secondary" onclick="Game.nextLevel()">⏭️ Next Level</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "harvest-heroes",
+  "version": "1.0.0",
+  "description": "Nutrition Farm Battle Game - Grow the biggest fruits & veggies!",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . -p 3000"
+  }
+}
