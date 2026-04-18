@@ -359,6 +359,7 @@ const Game = {
       };
       
       const onStart = (e) => {
+        e.preventDefault(); // always prevent default to avoid scroll
         const pos = getPos(e);
         touchStartPos = { ...pos };
         touchStartTime = Date.now();
@@ -366,12 +367,11 @@ const Game = {
         const p = this.players[i];
         const dist = Math.sqrt((pos.x - p.x) ** 2 + (pos.y - p.y) ** 2);
         
-        if (dist < 40) {
+        if (dist < 45) {
           dragging = true;
           p.dragging = true;
           offsetX = p.x - pos.x;
           offsetY = p.y - pos.y;
-          e.preventDefault();
         }
       };
       
@@ -444,17 +444,24 @@ const Game = {
       }
     }
     
-    // Tap near a plot? Check both tap position AND farmer position
-    let interacted = false;
+    // Find closest plot to tap position
+    let bestPlotIdx = -1;
+    let bestDist = Infinity;
     p.plots.forEach((plot, pi) => {
-      if (interacted) return;
       const tapDist = Math.abs(pos.x - plot.x) + Math.abs(pos.y - plot.y);
-      const farmerDist = Math.abs(p.x - plot.x) + Math.abs(p.y - plot.y);
-      if (tapDist < 55 || farmerDist < 55) {
-        this.interactPlot(playerIdx, pi);
-        interacted = true;
+      if (tapDist < bestDist) {
+        bestDist = tapDist;
+        bestPlotIdx = pi;
       }
     });
+    // Interact if close enough
+    if (bestPlotIdx >= 0) {
+      const hasSeeds = p.heldSeeds.length > 0 && !p.plots[bestPlotIdx].planted;
+      const threshold = hasSeeds ? 80 : 65;
+      if (bestDist < threshold) {
+        this.interactPlot(playerIdx, bestPlotIdx);
+      }
+    }
   },
 
   handleNearestAction(playerIdx) {
@@ -898,10 +905,10 @@ const Game = {
       player.heldSeeds.forEach((s, si) => {
         const sx = charX + (-12 + si * 14) * scaleX;
         const sy = charY - 22 * scaleY;
-        // Seed bag background
+        // Seed bag background (compatible circle)
         ctx.fillStyle = 'rgba(139,105,20,0.7)';
         ctx.beginPath();
-        ctx.roundRect(sx - 8 * scaleX, sy - 10 * scaleY, 16 * scaleX, 14 * scaleY, 3 * scaleX);
+        ctx.arc(sx, sy - 3 * scaleY, 9 * scaleX, 0, Math.PI * 2);
         ctx.fill();
         ctx.font = `${11 * scaleX}px serif`;
         ctx.textAlign = 'center';
