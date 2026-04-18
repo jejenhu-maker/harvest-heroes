@@ -260,6 +260,7 @@ const Game = {
     });
 
     this.timeLeft = this.gameDuration;
+    this.spawnGroundTools();
     this.showScreen('game');
     requestAnimationFrame(() => {
       this.setupGameScreen();
@@ -273,6 +274,16 @@ const Game = {
       { seed: null, x: 100, y: 220, growth: 0, watered: 0, fertilized: false, harvested: false, currentKg: 0, planted: false },
       { seed: null, x: 200, y: 220, growth: 0, watered: 0, fertilized: false, harvested: false, currentKg: 0, planted: false },
       { seed: null, x: 300, y: 220, growth: 0, watered: 0, fertilized: false, harvested: false, currentKg: 0, planted: false },
+    ];
+  },
+
+  // Ground tools that can be picked up by tapping
+  groundTools: [],
+
+  spawnGroundTools() {
+    this.groundTools = [
+      { type: 'shovel',  emoji: '🔧', x: 60,  y: 260 },
+      { type: 'water',   emoji: '🚿', x: 350, y: 260 },
     ];
   },
 
@@ -397,6 +408,20 @@ const Game = {
       overlay.classList.add('active');
       return;
     }
+
+    // Tap near a ground tool?
+    for (let ti = this.groundTools.length - 1; ti >= 0; ti--) {
+      const tool = this.groundTools[ti];
+      const dist = Math.abs(pos.x - tool.x) + Math.abs(pos.y - tool.y);
+      if (dist < 40) {
+        p.tool = tool.type;
+        p.heldSeeds = [];
+        this.showFloater(playerIdx, tool.x, tool.y - 15, `Got ${tool.emoji}!`);
+        this.updateHeldDisplay(playerIdx);
+        this.groundTools.splice(ti, 1);
+        return;
+      }
+    }
     
     // Tap near a plot?
     p.plots.forEach((plot, pi) => {
@@ -444,20 +469,28 @@ const Game = {
       return;
     }
     
-    // Planted — interact based on tool
-    if (plot.planted && !plot.harvested) {
-      if (p.tool === 'water') {
-        plot.watered = Math.min(plot.watered + 30, 50);
-        this.showFloater(playerIdx, plot.x, plot.y - 30, '💧');
-      } else if (p.tool === 'fertilizer') {
-        plot.fertilized = true;
-        p.tool = 'none';
-        this.showFloater(playerIdx, plot.x, plot.y - 30, '💊✨');
-        this.updateHeldDisplay(playerIdx);
-      } else if (plot.growth >= 100) {
-        plot.harvested = true;
-        this.showFloater(playerIdx, plot.x, plot.y - 30, `${plot.seed.emoji} ${plot.currentKg.toFixed(1)}kg!`);
-      }
+    if (!plot.planted || plot.harvested) return;
+
+    // Harvest first — ripe fruit can always be picked (hand, shovel, any tool)
+    if (plot.growth >= 100) {
+      plot.harvested = true;
+      this.showFloater(playerIdx, plot.x, plot.y - 30, `${plot.seed.emoji} ${plot.currentKg.toFixed(1)}kg!`);
+      return;
+    }
+    
+    // Not ripe yet — use tool
+    if (p.tool === 'water') {
+      plot.watered = Math.min(plot.watered + 30, 50);
+      this.showFloater(playerIdx, plot.x, plot.y - 30, '💧');
+    } else if (p.tool === 'fertilizer') {
+      plot.fertilized = true;
+      p.tool = 'none';
+      this.showFloater(playerIdx, plot.x, plot.y - 30, '💊✨');
+      this.updateHeldDisplay(playerIdx);
+    } else if (p.tool === 'shovel') {
+      // Shovel digs = speeds up growth a bit
+      plot.growth = Math.min(100, plot.growth + 15);
+      this.showFloater(playerIdx, plot.x, plot.y - 30, '⛏️ Dig!');
     }
   },
 
@@ -598,6 +631,28 @@ const Game = {
     groundGrad.addColorStop(1, '#388E3C');
     ctx.fillStyle = groundGrad;
     ctx.fillRect(0, h * 0.4, w, h * 0.6);
+
+    // Ground tools
+    this.groundTools.forEach(tool => {
+      const tx = tool.x * scaleX;
+      const ty = tool.y * scaleY;
+      // Shadow circle
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.beginPath();
+      ctx.ellipse(tx, ty + 8 * scaleY, 14 * scaleX, 5 * scaleY, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Tool emoji
+      ctx.font = `${24 * scaleX}px serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(tool.emoji, tx, ty);
+      // Pickup hint
+      ctx.font = `bold ${8 * scaleX}px Fredoka, sans-serif`;
+      ctx.fillStyle = '#FFF';
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1.5;
+      ctx.strokeText('TAP', tx, ty + 18 * scaleY);
+      ctx.fillText('TAP', tx, ty + 18 * scaleY);
+    });
 
     // Fence (decorative)
     ctx.strokeStyle = '#8D6E63';
