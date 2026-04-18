@@ -45,7 +45,17 @@ const TOOLS = {
   water:      { emoji: '🚿', name: 'Water Can', boost: 1.5 },
   shovel:     { emoji: '🔧', name: 'Shovel', boost: 1.2 },
   fertilizer: { emoji: '💊', name: 'Fertilizer', boost: 2.0 },
+  sprinkler:  { emoji: '💦', name: 'Auto Sprinkler', boost: 0 },
 };
+
+const FOODS = [
+  { emoji: '🍔', name: 'Burger',   effect: 'speed',  value: 1.5, duration: 150 },
+  { emoji: '🍕', name: 'Pizza',    effect: 'speed',  value: 1.3, duration: 200 },
+  { emoji: '🍪', name: 'Cookie',   effect: 'energy', value: 20,  duration: 0 },
+  { emoji: '🍎', name: 'Apple',    effect: 'energy', value: 30,  duration: 0 },
+  { emoji: '🧃', name: 'Juice',    effect: 'speed',  value: 1.4, duration: 180 },
+  { emoji: '🍰', name: 'Cake',     effect: 'energy', value: 50,  duration: 0 },
+];
 
 // ─── Game State ───
 const Game = {
@@ -265,6 +275,9 @@ const Game = {
       p.y = 200;
       p.finished = false;
       p.finishDay = 0;
+      p.speedMult = 1;
+      p.speedTimer = 0;
+      p.sprinklers = []; // placed sprinklers: [{x, y, plotIdx}]
     });
 
     this.timeLeft = this.gameDuration;
@@ -290,9 +303,23 @@ const Game = {
 
   spawnGroundTools() {
     this.groundTools = [
-      { type: 'shovel',  emoji: '🔧', x: 60,  y: 260 },
-      { type: 'water',   emoji: '🚿', x: 350, y: 260 },
+      { type: 'shovel',    emoji: '🔧', x: 60,  y: 260 },
+      { type: 'water',     emoji: '🚿', x: 350, y: 260 },
+      { type: 'sprinkler', emoji: '💦', x: 200, y: 270 },
     ];
+    // Spawn food items
+    this.groundFoods = [];
+    this.spawnFood();
+  },
+
+  spawnFood() {
+    // Spawn a random food at a random position
+    const food = FOODS[Math.floor(Math.random() * FOODS.length)];
+    this.groundFoods.push({
+      ...food,
+      x: 40 + Math.random() * 320,
+      y: 180 + Math.random() * 80,
+    });
   },
 
   // ═══ Game Screen Setup ═══
@@ -430,6 +457,26 @@ const Game = {
       return;
     }
 
+    // Tap near food?
+    for (let fi = this.groundFoods.length - 1; fi >= 0; fi--) {
+      const food = this.groundFoods[fi];
+      const dist = Math.abs(pos.x - food.x) + Math.abs(pos.y - food.y);
+      if (dist < 45) {
+        // Eat it!
+        if (food.effect === 'speed') {
+          p.speedMult = food.value;
+          p.speedTimer = food.duration;
+          this.showFloater(playerIdx, food.x, food.y - 15, `${food.emoji} Speed ⚡`);
+        } else {
+          this.showFloater(playerIdx, food.x, food.y - 15, `${food.emoji} Yum!`);
+        }
+        this.groundFoods.splice(fi, 1);
+        // Spawn new food after a delay
+        setTimeout(() => this.spawnFood(), 5000);
+        return;
+      }
+    }
+
     // Tap near a ground tool?
     for (let ti = this.groundTools.length - 1; ti >= 0; ti--) {
       const tool = this.groundTools[ti];
@@ -507,6 +554,18 @@ const Game = {
     
     if (!plot.planted || plot.harvested) return;
 
+    // Sprinkler: place it next to the plot
+    if (p.tool === 'sprinkler') {
+      const alreadyHas = p.sprinklers.some(s => s.plotIdx === plotIdx);
+      if (!alreadyHas) {
+        p.sprinklers.push({ x: plot.x + 25, y: plot.y + 5, plotIdx });
+        p.tool = 'none';
+        this.showFloater(playerIdx, plot.x, plot.y - 20, '💦 Sprinkler set!');
+        this.updateHeldDisplay(playerIdx);
+      }
+      return;
+    }
+
     // Harvest first — ripe fruit can always be picked (hand, shovel, any tool)
     if (plot.growth >= 100) {
       plot.harvested = true;
@@ -562,6 +621,20 @@ const Game = {
             plot.currentKg = (plot.growth / 100) * plot.seed.maxKg;
           }
         });
+        // Auto-sprinklers water their plots
+        p.sprinklers.forEach(spr => {
+          const plot = p.plots[spr.plotIdx];
+          if (plot && plot.planted && !plot.harvested) {
+            plot.watered = Math.min(plot.watered + 0.5, 50);
+          }
+        });
+
+        // Speed boost timer
+        if (p.speedTimer > 0) {
+          p.speedTimer--;
+          if (p.speedTimer <= 0) p.speedMult = 1;
+        }
+
         p.totalKg = p.plots.reduce((sum, pl) => sum + (pl.harvested ? pl.currentKg : 0), 0);
 
         // Check win: all plots planted & harvested
@@ -712,6 +785,39 @@ const Game = {
       ctx.lineWidth = 1.5;
       ctx.strokeText('TAP', tx, ty + 18 * scaleY);
       ctx.fillText('TAP', tx, ty + 18 * scaleY);
+    });
+
+    // Ground foods
+    this.groundFoods.forEach(food => {
+      const fx = food.x * scaleX;
+      const fy = food.y * scaleY;
+      // Bounce animation
+      const bounce = Math.sin(Date.now() / 300 + food.x) * 3;
+      ctx.font = `${22 * scaleX}px serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(food.emoji, fx, fy + bounce);
+      // Glow
+      ctx.font = `bold ${7 * scaleX}px Fredoka, sans-serif`;
+      ctx.fillStyle = '#FFD700';
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1;
+      ctx.strokeText('EAT', fx, fy + 16 * scaleY);
+      ctx.fillText('EAT', fx, fy + 16 * scaleY);
+    });
+
+    // Placed sprinklers
+    player.sprinklers.forEach(spr => {
+      const sx = spr.x * scaleX;
+      const sy = spr.y * scaleY;
+      ctx.font = `${14 * scaleX}px serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('💦', sx, sy);
+      // Water drops animation
+      const drops = Math.sin(Date.now() / 200 + spr.x) * 2;
+      ctx.globalAlpha = 0.5;
+      ctx.fillText('💧', sx - 8 * scaleX, sy - 10 * scaleY + drops);
+      ctx.fillText('💧', sx + 8 * scaleX, sy - 14 * scaleY - drops);
+      ctx.globalAlpha = 1;
     });
 
     // Fence (decorative)
