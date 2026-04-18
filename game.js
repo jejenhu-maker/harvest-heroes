@@ -342,6 +342,9 @@ const Game = {
       
       let dragging = false;
       let offsetX = 0, offsetY = 0;
+      let touchStartPos = null;
+      let touchStartTime = 0;
+      let moved = false;
       
       const getPos = (e) => {
         const t = e.touches ? e.touches[0] : e;
@@ -354,6 +357,9 @@ const Game = {
       
       const onStart = (e) => {
         const pos = getPos(e);
+        touchStartPos = { ...pos };
+        touchStartTime = Date.now();
+        moved = false;
         const p = this.players[i];
         const dist = Math.sqrt((pos.x - p.x) ** 2 + (pos.y - p.y) ** 2);
         
@@ -363,24 +369,31 @@ const Game = {
           offsetX = p.x - pos.x;
           offsetY = p.y - pos.y;
           e.preventDefault();
-        } else {
-          // Tap on a plot to interact
-          this.handleTap(i, pos);
         }
       };
       
       const onMove = (e) => {
         if (!dragging) return;
         e.preventDefault();
+        moved = true;
         const pos = getPos(e);
         const p = this.players[i];
         p.x = Math.max(20, Math.min(380, pos.x + offsetX));
         p.y = Math.max(40, Math.min(280, pos.y + offsetY));
       };
       
-      const onEnd = () => {
+      const onEnd = (e) => {
+        const elapsed = Date.now() - touchStartTime;
+        const pos = touchStartPos;
+        
+        // Short tap (< 200ms) or no movement = interaction, not drag
+        if (pos && elapsed < 250 && !moved) {
+          this.handleTap(i, pos);
+        }
+        
         dragging = false;
         if (this.players[i]) this.players[i].dragging = false;
+        touchStartPos = null;
       };
       
       canvas.addEventListener('touchstart', onStart, { passive: false });
@@ -428,11 +441,15 @@ const Game = {
       }
     }
     
-    // Tap near a plot?
+    // Tap near a plot? Check both tap position AND farmer position
+    let interacted = false;
     p.plots.forEach((plot, pi) => {
-      const dist = Math.abs(pos.x - plot.x) + Math.abs(pos.y - plot.y);
-      if (dist < 45) {
+      if (interacted) return;
+      const tapDist = Math.abs(pos.x - plot.x) + Math.abs(pos.y - plot.y);
+      const farmerDist = Math.abs(p.x - plot.x) + Math.abs(p.y - plot.y);
+      if (tapDist < 55 || farmerDist < 55) {
         this.interactPlot(playerIdx, pi);
+        interacted = true;
       }
     });
   },
