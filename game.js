@@ -469,6 +469,7 @@ const Game = {
       plot.seed = seed;
       plot.planted = true;
       plot.growth = 0;
+      plot.plantedDay = this.currentDay;
       this.showFloater(playerIdx, plot.x, plot.y - 20, `${seed.emoji} Planted!`);
       this.updateHeldDisplay(playerIdx);
       return;
@@ -519,13 +520,15 @@ const Game = {
       this.players.forEach(p => {
         p.plots.forEach(plot => {
           if (plot.planted && !plot.harvested && plot.growth < 100) {
-            // Growth tied to day progress
-            const dayProgress = (this.currentDay - 1 + this.dayTimer / (this.dayDuration * 10));
-            let growthTarget = (dayProgress / plot.seed.growTime) * 100;
-            // Boosts
-            if (plot.watered > 0) { growthTarget *= 1.3; plot.watered = Math.max(0, plot.watered - 0.1); }
-            if (plot.fertilized) growthTarget *= 1.5;
-            plot.growth = Math.min(100, growthTarget);
+            // Growth = discrete per day (each new day adds a chunk)
+            const daysGrown = this.currentDay - (plot.plantedDay || 1);
+            let growthPerDay = 100 / plot.seed.growTime;
+            if (plot.watered > 0) { growthPerDay *= 1.3; plot.watered = Math.max(0, plot.watered - 0.1); }
+            if (plot.fertilized) growthPerDay *= 1.5;
+            const target = Math.min(100, daysGrown * growthPerDay);
+            // Smooth lerp toward target (so it doesn't jump instantly)
+            plot.growth += (target - plot.growth) * 0.1;
+            if (Math.abs(plot.growth - target) < 0.5) plot.growth = target;
             plot.currentKg = (plot.growth / 100) * plot.seed.maxKg;
           }
         });
@@ -591,7 +594,7 @@ const Game = {
       }
 
       // Update HUD weight
-      document.getElementById(`hud-weight-${i+1}`).textContent = p.totalKg.toFixed(1) + ' kg';
+      document.getElementById(`hud-weight-${i+1}`).textContent = p.totalKg > 0 ? p.totalKg.toFixed(1) + ' kg' : '';
     });
   },
 
