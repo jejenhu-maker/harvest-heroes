@@ -4,28 +4,31 @@
    ═══════════════════════════════════════════ */
 
 const SEEDS = [
-  // Page 1 — Vegetables
-  { name: 'Tomato',     emoji: '🍅', color: '#E53935', growTime: 8,  maxKg: 3.2, stemColor: '#4CAF50', page: 0 },
-  { name: 'Carrot',     emoji: '🥕', color: '#FF8C00', growTime: 6,  maxKg: 1.8, stemColor: '#66BB6A', page: 0 },
-  { name: 'Broccoli',   emoji: '🥦', color: '#4CAF50', growTime: 10, maxKg: 2.5, stemColor: '#388E3C', page: 0 },
-  { name: 'Corn',       emoji: '🌽', color: '#FFD700', growTime: 12, maxKg: 4.0, stemColor: '#8BC34A', page: 0 },
-  { name: 'Pepper',     emoji: '🫑', color: '#388E3C', growTime: 7,  maxKg: 2.0, stemColor: '#4CAF50', page: 0 },
-  { name: 'Eggplant',   emoji: '🍆', color: '#7B1FA2', growTime: 11, maxKg: 3.5, stemColor: '#66BB6A', page: 0 },
-  { name: 'Potato',     emoji: '🥔', color: '#C8A86E', growTime: 9,  maxKg: 2.8, stemColor: '#8BC34A', page: 0 },
+  // Page 1 — Vegetables (green & colorful)
+  { name: 'Tomato',      emoji: '🍅', flower: '🌼', color: '#E53935', growTime: 8,  maxKg: 3.2, stemColor: '#4CAF50', page: 0 },
+  { name: 'Carrot',      emoji: '🥕', flower: '🌸', color: '#FF8C00', growTime: 6,  maxKg: 1.8, stemColor: '#66BB6A', page: 0 },
+  { name: 'Broccoli',    emoji: '🥦', flower: '🌼', color: '#4CAF50', growTime: 10, maxKg: 2.5, stemColor: '#388E3C', page: 0 },
+  { name: 'Corn',        emoji: '🌽', flower: '🌾', color: '#FFD700', growTime: 12, maxKg: 4.0, stemColor: '#8BC34A', page: 0 },
+  { name: 'Pepper',      emoji: '🫑', flower: '🌸', color: '#388E3C', growTime: 7,  maxKg: 2.0, stemColor: '#4CAF50', page: 0 },
+  { name: 'Eggplant',    emoji: '🍆', flower: '💜', color: '#7B1FA2', growTime: 11, maxKg: 3.5, stemColor: '#66BB6A', page: 0 },
+  { name: 'Potato',      emoji: '🥔', flower: '🌸', color: '#C8A86E', growTime: 9,  maxKg: 2.8, stemColor: '#8BC34A', page: 0 },
+  { name: 'Lettuce',     emoji: '🥬', flower: '🌼', color: '#66BB6A', growTime: 4,  maxKg: 0.8, stemColor: '#4CAF50', page: 0 },
+  { name: 'Cabbage',     emoji: '🥬', flower: '🌸', color: '#81C784', growTime: 7,  maxKg: 2.0, stemColor: '#388E3C', page: 0 },
   // Page 2 — Fruits
-  { name: 'Strawberry', emoji: '🍓', color: '#FF6B9D', growTime: 5,  maxKg: 1.2, stemColor: '#4CAF50', page: 1 },
-  { name: 'Orange',     emoji: '🍊', color: '#FF9800', growTime: 9,  maxKg: 2.8, stemColor: '#795548', page: 1 },
-  { name: 'Watermelon', emoji: '🍉', color: '#66BB6A', growTime: 15, maxKg: 8.0, stemColor: '#4CAF50', page: 1 },
-  { name: 'Apple',      emoji: '🍎', color: '#E53935', growTime: 10, maxKg: 3.0, stemColor: '#795548', page: 1 },
-  { name: 'Grape',      emoji: '🍇', color: '#9C27B0', growTime: 8,  maxKg: 2.2, stemColor: '#795548', page: 1 },
-  { name: 'Peach',      emoji: '🍑', color: '#FFAB91', growTime: 7,  maxKg: 2.0, stemColor: '#795548', page: 1 },
+  { name: 'Strawberry',  emoji: '🍓', flower: '🌸', color: '#FF6B9D', growTime: 5,  maxKg: 1.2, stemColor: '#4CAF50', page: 1 },
+  { name: 'Orange',      emoji: '🍊', flower: '🌼', color: '#FF9800', growTime: 9,  maxKg: 2.8, stemColor: '#795548', page: 1 },
+  { name: 'Watermelon',  emoji: '🍉', flower: '🌼', color: '#66BB6A', growTime: 15, maxKg: 8.0, stemColor: '#4CAF50', page: 1 },
+  { name: 'Apple',       emoji: '🍎', flower: '🌸', color: '#E53935', growTime: 10, maxKg: 3.0, stemColor: '#795548', page: 1 },
+  { name: 'Grape',       emoji: '🍇', flower: '💜', color: '#9C27B0', growTime: 8,  maxKg: 2.2, stemColor: '#795548', page: 1 },
+  { name: 'Peach',       emoji: '🍑', flower: '🌸', color: '#FFAB91', growTime: 7,  maxKg: 2.0, stemColor: '#795548', page: 1 },
+  { name: 'Blueberry',   emoji: '🫐', flower: '🌸', color: '#5C6BC0', growTime: 6,  maxKg: 1.0, stemColor: '#4CAF50', page: 1 },
   // Page 3 — Exotic
-  { name: 'Pineapple',  emoji: '🍍', color: '#FDD835', growTime: 14, maxKg: 5.0, stemColor: '#8BC34A', page: 2 },
-  { name: 'Coconut',    emoji: '🥥', color: '#8D6E63', growTime: 16, maxKg: 6.0, stemColor: '#795548', page: 2 },
-  { name: 'Mango',      emoji: '🥭', color: '#FF9800', growTime: 11, maxKg: 3.5, stemColor: '#795548', page: 2 },
-  { name: 'Lemon',      emoji: '🍋', color: '#FDD835', growTime: 6,  maxKg: 1.5, stemColor: '#4CAF50', page: 2 },
-  { name: 'Cherry',     emoji: '🍒', color: '#C62828', growTime: 5,  maxKg: 1.0, stemColor: '#795548', page: 2 },
-  { name: 'Banana',     emoji: '🍌', color: '#FFE082', growTime: 8,  maxKg: 2.5, stemColor: '#8BC34A', page: 2 },
+  { name: 'Pineapple',   emoji: '🍍', flower: '🌺', color: '#FDD835', growTime: 14, maxKg: 5.0, stemColor: '#8BC34A', page: 2 },
+  { name: 'Coconut',     emoji: '🥥', flower: '🌺', color: '#8D6E63', growTime: 16, maxKg: 6.0, stemColor: '#795548', page: 2 },
+  { name: 'Mango',       emoji: '🥭', flower: '🌼', color: '#FF9800', growTime: 11, maxKg: 3.5, stemColor: '#795548', page: 2 },
+  { name: 'Lemon',       emoji: '🍋', flower: '🌼', color: '#FDD835', growTime: 6,  maxKg: 1.5, stemColor: '#4CAF50', page: 2 },
+  { name: 'Cherry',      emoji: '🍒', flower: '🌸', color: '#C62828', growTime: 5,  maxKg: 1.0, stemColor: '#795548', page: 2 },
+  { name: 'Banana',      emoji: '🍌', flower: '🌺', color: '#FFE082', growTime: 8,  maxKg: 2.5, stemColor: '#8BC34A', page: 2 },
 ];
 
 const PAGE_NAMES = ['🥬 Vegetables', '🍎 Fruits', '🌴 Exotic'];
@@ -57,7 +60,7 @@ const Game = {
   timeLeft: 60,
   currentDay: 1,
   dayTimer: 0,
-  dayDuration: 5, // real seconds per game-day
+  dayDuration: 8, // real seconds per game-day (slower pace)
   animFrame: null,
   seedPage: 0,
   seedSwipe: { startX: 0, currentX: 0, swiping: false },
@@ -480,13 +483,16 @@ const Game = {
     const p = this.players[playerIdx];
     const plot = p.plots[plotIdx];
     
-    // Not planted yet — plant a seed from hand
+    // Not planted yet — plant a seed from hand, and walk farmer to plot
     if (!plot.planted && p.heldSeeds.length > 0) {
       const seed = p.heldSeeds.shift();
       plot.seed = seed;
       plot.planted = true;
       plot.growth = 0;
       plot.plantedDay = this.currentDay;
+      // Snap farmer near the plot
+      p.x = plot.x;
+      p.y = plot.y - 30;
       this.showFloater(playerIdx, plot.x, plot.y - 20, `${seed.emoji} Planted!`);
       this.updateHeldDisplay(playerIdx);
       return;
@@ -732,49 +738,63 @@ const Game = {
 
       if (plot.planted && plot.seed) {
         const growthFrac = plot.growth / 100;
-        
-        // Stem — grows from soil upward
-        const stemHeight = growthFrac * 45 * scaleY;
+        // Growth phases: 0-20% sprout, 20-50% stem+leaves, 50-75% flower, 75-100% fruit
+        const stemMaxH = 50 * scaleY;
+        const stemHeight = Math.min(growthFrac * 1.3, 1) * stemMaxH;
         const stemX = px;
         const stemBottom = py + 6 * scaleY;
         const stemTop = stemBottom - stemHeight;
         
-        if (stemHeight > 2) {
+        // Phase 1: Sprout (0-20%)
+        if (growthFrac > 0.02 && stemHeight > 2) {
+          // Main stem
           ctx.strokeStyle = plot.seed.stemColor;
-          ctx.lineWidth = 3 * scaleX;
+          ctx.lineWidth = (2 + growthFrac * 2) * scaleX;
           ctx.lineCap = 'round';
           ctx.beginPath();
           ctx.moveTo(stemX, stemBottom);
-          // Slight curve for natural look
-          ctx.quadraticCurveTo(stemX + 3 * scaleX * Math.sin(growthFrac * 2), stemBottom - stemHeight * 0.5, stemX, stemTop);
+          ctx.quadraticCurveTo(stemX + 3 * scaleX * Math.sin(growthFrac * 3), stemBottom - stemHeight * 0.5, stemX, stemTop);
           ctx.stroke();
-          
-          // Leaves (appear at 30%+)
-          if (growthFrac > 0.3) {
-            const leafY = stemBottom - stemHeight * 0.5;
-            ctx.font = `${10 + growthFrac * 6}px serif`;
-            ctx.textAlign = 'center';
-            ctx.fillText('🌿', stemX - 10 * scaleX, leafY);
-          }
-          
-          // Second leaf at 60%
-          if (growthFrac > 0.6) {
-            const leafY2 = stemBottom - stemHeight * 0.7;
-            ctx.font = `${8 + growthFrac * 5}px serif`;
-            ctx.textAlign = 'center';
-            ctx.fillText('🍃', stemX + 10 * scaleX, leafY2);
+        }
+
+        // Phase 2: Leaves (20%+)
+        if (growthFrac > 0.2) {
+          const leafScale = Math.min((growthFrac - 0.2) / 0.3, 1);
+          const leafY = stemBottom - stemHeight * 0.4;
+          ctx.font = `${(8 + leafScale * 8) * scaleX}px serif`;
+          ctx.textAlign = 'center';
+          ctx.fillText('🌿', stemX - 12 * scaleX, leafY);
+          if (growthFrac > 0.35) {
+            const leafY2 = stemBottom - stemHeight * 0.65;
+            ctx.fillText('🍃', stemX + 12 * scaleX, leafY2);
           }
         }
-        
-        // Fruit/Veggie on top of stem
-        if (growthFrac > 0.1) {
-          const fruitSize = 14 + growthFrac * 22;
+
+        // Phase 3: Flower (50-80%) — flower appears, then fades as fruit grows
+        if (growthFrac > 0.5 && growthFrac < 0.85 && !plot.harvested) {
+          const flowerAlpha = growthFrac < 0.75 ? 1 : 1 - (growthFrac - 0.75) / 0.1;
+          ctx.globalAlpha = Math.max(0, flowerAlpha);
+          const flowerSize = 16 + (Math.min(growthFrac, 0.75) - 0.5) * 40;
+          ctx.font = `${flowerSize * scaleX}px serif`;
+          ctx.textAlign = 'center';
+          ctx.fillText(plot.seed.flower || '🌸', stemX, stemTop - 2 * scaleY);
+          ctx.globalAlpha = 1;
+        }
+
+        // Phase 4: Fruit (75%+) — fruit appears where flower was
+        if (growthFrac > 0.75 && !plot.harvested) {
+          const fruitGrow = (growthFrac - 0.75) / 0.25; // 0 to 1
+          const fruitSize = 10 + fruitGrow * 26;
           ctx.font = `${fruitSize * scaleX}px serif`;
           ctx.textAlign = 'center';
-          
-          if (!plot.harvested) {
-            ctx.fillText(plot.seed.emoji, stemX, stemTop - 2 * scaleY);
-          }
+          ctx.fillText(plot.seed.emoji, stemX, stemTop - 2 * scaleY);
+        }
+
+        // Tiny sprout emoji for very early stage
+        if (growthFrac > 0 && growthFrac <= 0.15 && !plot.harvested) {
+          ctx.font = `${12 * scaleX}px serif`;
+          ctx.textAlign = 'center';
+          ctx.fillText('🌱', stemX, stemBottom - 6 * scaleY);
         }
         
         // Growth bar below soil
@@ -833,7 +853,7 @@ const Game = {
     ctx.fillStyle = '#5D4037';
     ctx.fillText('SHED', shedX, shedY + 16 * scaleY);
 
-    // Player character — with glow when dragging
+    // Player character — body + legs drawn on canvas
     const charX = player.x * scaleX;
     const charY = player.y * scaleY;
     
@@ -841,33 +861,68 @@ const Game = {
       ctx.shadowColor = 'rgba(255,215,0,0.6)';
       ctx.shadowBlur = 15;
     }
+
+    // Legs (two little lines)
+    ctx.strokeStyle = '#5D4037';
+    ctx.lineWidth = 3 * scaleX;
+    ctx.lineCap = 'round';
+    // Left leg
+    ctx.beginPath();
+    ctx.moveTo(charX - 6 * scaleX, charY + 4 * scaleY);
+    ctx.lineTo(charX - 8 * scaleX, charY + 18 * scaleY);
+    ctx.stroke();
+    // Right leg
+    ctx.beginPath();
+    ctx.moveTo(charX + 6 * scaleX, charY + 4 * scaleY);
+    ctx.lineTo(charX + 8 * scaleX, charY + 18 * scaleY);
+    ctx.stroke();
+    // Boots
+    ctx.fillStyle = '#5D4037';
+    ctx.beginPath();
+    ctx.ellipse(charX - 8 * scaleX, charY + 19 * scaleY, 5 * scaleX, 3 * scaleY, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(charX + 8 * scaleX, charY + 19 * scaleY, 5 * scaleX, 3 * scaleY, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Farmer face/body emoji
     ctx.font = `${32 * scaleX}px serif`;
     ctx.textAlign = 'center';
     ctx.fillText(player.farmer.emoji, charX, charY);
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
 
-    // Held seeds or tool indicator next to farmer
+    // Held items — seeds shown as seed packets, tool shown next to farmer
     if (player.heldSeeds.length > 0) {
-      ctx.font = `${14 * scaleX}px serif`;
+      // Show seed emojis in small circles above farmer
       player.heldSeeds.forEach((s, si) => {
-        ctx.fillText(s.emoji, charX + (18 + si * 14) * scaleX, charY - 12 * scaleY);
+        const sx = charX + (-12 + si * 14) * scaleX;
+        const sy = charY - 22 * scaleY;
+        // Seed bag background
+        ctx.fillStyle = 'rgba(139,105,20,0.7)';
+        ctx.beginPath();
+        ctx.roundRect(sx - 8 * scaleX, sy - 10 * scaleY, 16 * scaleX, 14 * scaleY, 3 * scaleX);
+        ctx.fill();
+        ctx.font = `${11 * scaleX}px serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(s.emoji, sx, sy + 1 * scaleY);
       });
     } else if (player.tool !== 'none') {
-      ctx.font = `${16 * scaleX}px serif`;
-      ctx.fillText(TOOLS[player.tool].emoji, charX + 18 * scaleX, charY - 12 * scaleY);
+      ctx.font = `${18 * scaleX}px serif`;
+      ctx.fillText(TOOLS[player.tool].emoji, charX + 20 * scaleX, charY - 8 * scaleY);
     }
 
-    // "Drag me!" hint (first few seconds)
-    if (this.timeLeft > 55) {
-      ctx.globalAlpha = (this.timeLeft - 55) / 5;
+    // "Drag me!" hint (first day)
+    if (this.currentDay <= 1 && this.dayTimer < this.dayDuration * 5) {
+      const hintAlpha = 1 - this.dayTimer / (this.dayDuration * 5);
+      ctx.globalAlpha = hintAlpha;
       ctx.font = `bold ${11 * scaleX}px Fredoka, sans-serif`;
       ctx.fillStyle = '#FFF';
       ctx.strokeStyle = '#333';
       ctx.lineWidth = 2;
       const hint = '👆 Drag me!';
-      ctx.strokeText(hint, charX, charY - 24 * scaleY);
-      ctx.fillText(hint, charX, charY - 24 * scaleY);
+      ctx.strokeText(hint, charX, charY - 30 * scaleY);
+      ctx.fillText(hint, charX, charY - 30 * scaleY);
       ctx.globalAlpha = 1;
     }
 
